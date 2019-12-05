@@ -2,12 +2,12 @@
 // Any changes will be lost if this file is regenerated.
 // see https://github.com/cheekybits/genny
 
-package primitives
+package concrete_caches
 
 import caches "github.com/npxcomplete/caches/src"
 
-func NewLRUStringSWCBCache(capacity int) genericKeyStringLRUCache {
-	return genericKeyStringLRUCache{caches.NewLRUCache(capacity)}
+func NewIntStringLRUCache(capacity int) privateIntStringLRUCache {
+	return privateIntStringLRUCache{caches.NewLRUCache(capacity)}
 }
 
 type IntStringCache interface {
@@ -17,16 +17,17 @@ type IntStringCache interface {
 	Get(key int) (string, error)
 }
 
-type genericKeyStringLRUCache struct {
+// genny is case sensitive even though this has other meanings in go, so we prefix the intent.
+type privateIntStringLRUCache struct {
 	generic caches.Interface
 }
 
-func (cache genericKeyStringLRUCache) Put(key int, value string) string {
+func (cache privateIntStringLRUCache) Put(key int, value string) string {
 	result, _ := cache.generic.Put(key, value).(string)
 	return result
 }
 
-func (cache genericKeyStringLRUCache) Get(key int) (result string, err error) {
+func (cache privateIntStringLRUCache) Get(key int) (result string, err error) {
 	value, err := cache.generic.Get(key)
 	result, _ = value.(string)
 	return
