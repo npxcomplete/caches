@@ -13,23 +13,18 @@ func NewExamplesMyCustomTypeExamplesMyCustomTypeLRUCache(capacity int) privateEx
 	return privateExamplesMyCustomTypeExamplesMyCustomTypeLRUCache{caches.NewLRUCache(capacity)}
 }
 
-type ExamplesMyCustomTypeExamplesMyCustomTypeCache interface {
-	// add the control block to the cache
-	// return whatever control block was evicted if any
-	Put(key examples.MyCustomType, value examples.MyCustomType) examples.MyCustomType
-	Get(key examples.MyCustomType) (examples.MyCustomType, error)
-}
-
-// genny is case sensitive even though this has other meanings in go, so we prefix the intent to hide the concrete type.
+// genny is case sensitive even though this has other meanings in go, so we prefix the intent.
 type privateExamplesMyCustomTypeExamplesMyCustomTypeLRUCache struct {
 	generic caches.Interface
 }
 
+// see caches.Interface for contract
 func (cache privateExamplesMyCustomTypeExamplesMyCustomTypeLRUCache) Put(key examples.MyCustomType, value examples.MyCustomType) examples.MyCustomType {
 	result, _ := cache.generic.Put(key, value).(examples.MyCustomType)
 	return result
 }
 
+// see caches.Interface for contract
 func (cache privateExamplesMyCustomTypeExamplesMyCustomTypeLRUCache) Get(key examples.MyCustomType) (result examples.MyCustomType, err error) {
 	value, err := cache.generic.Get(key)
 	result, _ = value.(examples.MyCustomType)

@@ -10,23 +10,18 @@ func NewIntStringLRUCache(capacity int) privateIntStringLRUCache {
 	return privateIntStringLRUCache{caches.NewLRUCache(capacity)}
 }
 
-type IntStringCache interface {
-	// add the control block to the cache
-	// return whatever control block was evicted if any
-	Put(key int, value string) string
-	Get(key int) (string, error)
-}
-
 // genny is case sensitive even though this has other meanings in go, so we prefix the intent.
 type privateIntStringLRUCache struct {
 	generic caches.Interface
 }
 
+// see caches.Interface for contract
 func (cache privateIntStringLRUCache) Put(key int, value string) string {
 	result, _ := cache.generic.Put(key, value).(string)
 	return result
 }
 
+// see caches.Interface for contract
 func (cache privateIntStringLRUCache) Get(key int) (result string, err error) {
 	value, err := cache.generic.Get(key)
 	result, _ = value.(string)
