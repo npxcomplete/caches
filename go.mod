@@ -4,5 +4,6 @@ go 1.12
 
 require (
 	github.com/cheekybits/genny v1.0.0
+	github.com/npxcomplete/random v0.0.0-20191215074600-22546b7becfe
 	github.com/stretchr/testify v1.4.0
 )
