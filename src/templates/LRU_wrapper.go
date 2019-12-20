@@ -10,7 +10,11 @@ type GenericKey generic.Type
 type GenericValue generic.Type
 
 func NewGenericKeyGenericValueLRUCache(capacity int) privateGenericKeyGenericValueLRUCache {
-	return privateGenericKeyGenericValueLRUCache{caches.NewLRUCache(capacity)}
+	return privateGenericKeyGenericValueLRUCache{generic: caches.NewLRUCache(capacity)}
+}
+
+func WrapGenericKeyGenericValueCache(cache caches.Interface) privateGenericKeyGenericValueLRUCache {
+	return privateGenericKeyGenericValueLRUCache{generic: cache}
 }
 
 // genny is case sensitive even though this has other meanings in go, so we prefix the intent.
@@ -30,4 +34,3 @@ func (cache privateGenericKeyGenericValueLRUCache) Get(key GenericKey) (result G
 	result, _ = value.(GenericValue)
 	return
 }
-
