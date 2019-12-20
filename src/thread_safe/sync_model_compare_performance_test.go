@@ -101,7 +101,7 @@ func benchmark_parallel_Get(b *testing.B, cache caches.Interface) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for i := 0; i < b.N; i++ {
+			for i := 0; i < b.N/threads; i++ {
 				cache.Get(keys[i%len(keys)])
 			}
 		}()
@@ -118,7 +118,7 @@ func benchmark_parallel_Put(b *testing.B, cache caches.Interface) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for i := 0; i < b.N; i++ {
+			for i := 0; i < b.N/threads; i++ {
 				cache.Put(keys[i%len(keys)], 91)
 			}
 		}()
