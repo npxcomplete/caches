@@ -2,6 +2,8 @@
 github.com/cheekybits/genny/generic
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
+# github.com/npxcomplete/random v0.0.0-20191215074600-22546b7becfe
+github.com/npxcomplete/random/src/strings
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.4.0

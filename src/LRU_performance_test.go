@@ -80,3 +80,19 @@ func Benchmark_LRUCache_Get_cycle(b *testing.B) {
 		lru.Get(keys[i % len(keys)])
 	}
 }
+
+func Benchmark_LRUCache_Put_with_eviction_and_no_gen(b *testing.B) {
+	lru := NewLRUCache(4)
+
+	keys := []string{
+		"aaaa",
+		"bbbb",
+		"cccc",
+		"dddd",
+		"eeee",
+	}
+
+	for i := 0; i < b.N; i++ {
+		lru.Put(keys[i % len(keys)], "world")
+	}
+}
