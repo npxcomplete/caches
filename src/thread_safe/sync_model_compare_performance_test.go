@@ -12,28 +12,62 @@ import (
 var capacity = 10
 var threads = 4
 
-func BenchmarkGuardedLRU_Get(b *testing.B) {
+func Benchmark_GuardedLRU_Get(b *testing.B) {
 	cache := NewGuardedCache(caches.NewLRUCache(capacity))
 	benchmark_Get(b, cache)
 }
 
-func BenchmarkOutOfBan_Get(b *testing.B) {
+func Benchmark_OutOfBan_Get(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
 	benchmark_Get(b, cache)
 }
 
-func BenchmarkGuardedLRU_Put(b *testing.B) {
+func Benchmark_GuardedLRU_Put(b *testing.B) {
 	cache := NewGuardedCache(caches.NewLRUCache(capacity))
 	benchmark_Put(b, cache)
 }
 
-func BenchmarkOutOfBan_Put(b *testing.B) {
+func Benchmark_OutOfBan_Put(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
 	benchmark_Put(b, cache)
+}
+
+func Benchmark_HashiCorp_GuardedLRU_parallel_Get(b *testing.B) {
+	cache := caches.New2Q(capacity)
+	benchmark_parallel_Get(b, cache)
+}
+
+func Benchmark_HashiCorp_LRU_parallel_Put(b *testing.B) {
+	cache := caches.New2Q(capacity)
+	benchmark_parallel_Put(b, cache)
+}
+
+func Benchmark_GuardedLRU_parallel_Get(b *testing.B) {
+	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	benchmark_parallel_Get(b, cache)
+}
+
+func Benchmark_GuardedLRU_parallel_Put(b *testing.B) {
+	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	benchmark_parallel_Put(b, cache)
+}
+
+func Benchmark_OutOfBan_parallel_Get(b *testing.B) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	benchmark_parallel_Get(b, cache)
+}
+
+func Benchmark_OutOfBan_parallel_Put(b *testing.B) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	benchmark_parallel_Put(b, cache)
 }
 
 func benchmark_Get(b *testing.B, cache caches.Interface) {
@@ -57,37 +91,6 @@ func benchmark_Put(b *testing.B, cache caches.Interface) {
 	}
 }
 
-func genKeys() []int {
-	alloc := make([]int, capacity*2)
-	for i := 0; i < len(alloc); i++ {
-		alloc[i] = rand.Int()
-	}
-	return alloc
-}
-
-func BenchmarkGuardedLRU_parallel_Get(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
-	benchmark_parallel_Get(b, cache)
-}
-
-func BenchmarkOutOfBan_parallel_Get(b *testing.B) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
-	benchmark_parallel_Get(b, cache)
-}
-
-func BenchmarkGuardedLRU_parallel_Put(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
-	benchmark_parallel_Put(b, cache)
-}
-
-func BenchmarkOutOfBan_parallel_Put(b *testing.B) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
-	benchmark_parallel_Put(b, cache)
-}
 
 func benchmark_parallel_Get(b *testing.B, cache caches.Interface) {
 	keys := genKeys()
@@ -102,7 +105,7 @@ func benchmark_parallel_Get(b *testing.B, cache caches.Interface) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < b.N/threads; i++ {
-				cache.Get(keys[i%len(keys)])
+				cache.Get(keys[rand.Int31n(int32(len(keys)))])
 			}
 		}()
 	}
@@ -119,9 +122,18 @@ func benchmark_parallel_Put(b *testing.B, cache caches.Interface) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < b.N/threads; i++ {
-				cache.Put(keys[i%len(keys)], 91)
+				cache.Put(keys[rand.Int31n(int32(len(keys)))], 91)
 			}
 		}()
 	}
 	wg.Wait()
 }
+
+func genKeys() []int {
+	alloc := make([]int, capacity*2)
+	for i := 0; i < len(alloc); i++ {
+		alloc[i] = rand.Int()
+	}
+	return alloc
+}
+

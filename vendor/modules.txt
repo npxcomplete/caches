@@ -2,6 +2,9 @@
 github.com/cheekybits/genny/generic
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
+# github.com/hashicorp/golang-lru v0.5.3
+github.com/hashicorp/golang-lru
+github.com/hashicorp/golang-lru/simplelru
 # github.com/npxcomplete/random v0.0.0-20191215074600-22546b7becfe
 github.com/npxcomplete/random/src/strings
 # github.com/pmezard/go-difflib v1.0.0
