@@ -8,7 +8,7 @@ import (
 )
 
 func Test_AddToEmptyCache(t *testing.T) {
-	var kvLRU caches.Interface = NewLRUCache(2)
+	var kvLRU caches.Interface = New_Broken_LRUCache(2)
 
 	kvLRU.Put(5, "hello")
 
@@ -21,7 +21,7 @@ func Test_AddToEmptyCache(t *testing.T) {
 }
 
 func Test_AddToFullCache(t *testing.T) {
-	var kvLRU caches.Interface = NewLRUCache(2)
+	var kvLRU caches.Interface = New_Broken_LRUCache(2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")
@@ -43,7 +43,7 @@ func Test_AddToFullCache(t *testing.T) {
 }
 
 func Test_QueriedValuesReset(t *testing.T) {
-	var kvLRU caches.Interface = NewLRUCache(2)
+	var kvLRU caches.Interface = New_Broken_LRUCache(2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")
@@ -67,7 +67,7 @@ func Test_QueriedValuesReset(t *testing.T) {
 }
 
 func Test_ValueNeverPresent(t *testing.T) {
-	var kvLRU caches.Interface = NewLRUCache(2)
+	var kvLRU caches.Interface = New_Broken_LRUCache(2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")

@@ -8,7 +8,7 @@ import (
 )
 
 func Benchmark_LRUCachewMapInterface_Put_single_key(b *testing.B) {
-	lru := NewLRUCache(2)
+	lru := New_Broken_LRUCache(2)
 
 	for i := 0; i < b.N; i++ {
 		lru.Put("hello", "world")
@@ -16,7 +16,7 @@ func Benchmark_LRUCachewMapInterface_Put_single_key(b *testing.B) {
 }
 
 func Benchmark_LRUCachewMapInterface_Put_multi_key_with_high_eviction(b *testing.B) {
-	lru := NewLRUCache(2)
+	lru := New_Broken_LRUCache(2)
 
 	gen := random_strings.ByteStringGenerator{
 		Alphabet:  random_strings.EnglishAlphabet,
@@ -29,7 +29,7 @@ func Benchmark_LRUCachewMapInterface_Put_multi_key_with_high_eviction(b *testing
 }
 
 func Benchmark_LRUCachewMapInterface_Put_multi_key_with_low_eviction(b *testing.B) {
-	lru := NewLRUCache(10000)
+	lru := New_Broken_LRUCache(10000)
 
 	gen := random_strings.ByteStringGenerator{
 		Alphabet:  random_strings.EnglishAlphabet,
@@ -42,7 +42,7 @@ func Benchmark_LRUCachewMapInterface_Put_multi_key_with_low_eviction(b *testing.
 }
 
 func Benchmark_LRUCachewMapInterface_Get_MRU(b *testing.B) {
-	lru := NewLRUCache(10)
+	lru := New_Broken_LRUCache(10)
 
 	keys := []string {
 		"hello1",
@@ -62,7 +62,7 @@ func Benchmark_LRUCachewMapInterface_Get_MRU(b *testing.B) {
 }
 
 func Benchmark_LRUCachewMapInterface_Get_cycle(b *testing.B) {
-	lru := NewLRUCache(10)
+	lru := New_Broken_LRUCache(10)
 
 	keys := []string {
 		"hello1",
@@ -82,7 +82,7 @@ func Benchmark_LRUCachewMapInterface_Get_cycle(b *testing.B) {
 }
 
 func Benchmark_LRUCachewMapInterface_Put_with_eviction_and_no_gen(b *testing.B) {
-	lru := NewLRUCache(4)
+	lru := New_Broken_LRUCache(4)
 
 	keys := []string{
 		"aaaa",
