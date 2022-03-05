@@ -44,6 +44,14 @@ func NewLRUCache(capacity int) *lruCache {
 	}
 }
 
+func (lru *lruCache) Keys() []Key {
+	keys := make([]Key, len(lru.nodes))
+	for _, node := range lru.nodes {
+		keys = append(keys, node.key)
+	}
+	return keys
+}
+
 func (lru *lruCache) Put(key Key, value Value) (evictedValue Value) {
 	var node *lruNode = nil
 	var ok bool

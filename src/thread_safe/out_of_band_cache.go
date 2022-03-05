@@ -36,6 +36,14 @@ type outOfBan struct {
 	generic               caches.Interface
 }
 
+func (cache *outOfBan) Keys() []caches.Key {
+	ret := make(chan []caches.Key)
+	cache.universalConstruction <- func() {
+		ret <- cache.generic.Keys()
+	}
+	return <-ret
+}
+
 // see caches.Interface for contract
 func (cache *outOfBan) Put(key caches.Key, value caches.Value) caches.Value {
 	ret := make(chan caches.Value)

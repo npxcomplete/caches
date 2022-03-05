@@ -19,6 +19,13 @@ type  guardedLRU struct {
 }
 
 // see caches.Interface for contract
+func (cache *guardedLRU) Keys() []caches.Key {
+	cache.mut.Lock()
+	defer cache.mut.Unlock()
+	return cache.generic.Keys()
+}
+
+// see caches.Interface for contract
 func (cache *guardedLRU) Put(key caches.Key, value caches.Value) caches.Value {
 	cache.mut.Lock()
 	defer cache.mut.Unlock()

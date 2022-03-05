@@ -6,6 +6,14 @@ type hashi2Q struct {
 	inner *hashicorp.TwoQueueCache
 }
 
+func (h hashi2Q) Keys() []Key {
+	keys := make([]Key, 0 , 8)
+	for _, key := range h.Keys() {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
 func (h hashi2Q) Put(k Key, v Value) Value {
 	h.inner.Add(k, v)
 	return nil
