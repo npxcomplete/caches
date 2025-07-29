@@ -13,8 +13,8 @@ func NewGuardedCache(p caches.Interface) caches.Interface {
 }
 
 // genny is case sensitive even though this has other meanings in go, so we prefix the intent.
-type  guardedLRU struct {
-	mut sync.Mutex
+type guardedLRU struct {
+	mut     sync.Mutex
 	generic caches.Interface
 }
 
@@ -33,9 +33,15 @@ func (cache *guardedLRU) Put(key caches.Key, value caches.Value) caches.Value {
 }
 
 // see caches.Interface for contract
-func (cache *guardedLRU)  Get(key caches.Key) (result caches.Value, err error) {
+func (cache *guardedLRU) Get(key caches.Key) (result caches.Value, err error) {
 	cache.mut.Lock()
 	defer cache.mut.Unlock()
 	return cache.generic.Get(key)
 }
 
+// see caches.Interface for contract
+func (cache *guardedLRU) Range(f func(caches.Key, caches.Value) bool) {
+	cache.mut.Lock()
+	defer cache.mut.Unlock()
+	cache.generic.Range(f)
+}

@@ -7,9 +7,10 @@ type hashi2Q struct {
 }
 
 func (h hashi2Q) Keys() []Key {
-	keys := make([]Key, 0 , 8)
-	for _, key := range h.Keys() {
-		keys = append(keys, key)
+	raw := h.inner.Keys()
+	keys := make([]Key, len(raw))
+	for i, k := range raw {
+		keys[i] = k
 	}
 	return keys
 }
@@ -25,6 +26,20 @@ func (h hashi2Q) Get(k Key) (get Value, err error) {
 		err = MissingValueError
 	}
 	return
+}
+
+// Range invokes f for every key/value pair stored in the cache. Iteration
+// stops if f returns false.
+func (h hashi2Q) Range(f func(Key, Value) bool) {
+	for _, k := range h.inner.Keys() {
+		v, ok := h.inner.Peek(k)
+		if !ok {
+			continue
+		}
+		if !f(k, v) {
+			return
+		}
+	}
 }
 
 func New2Q(capacity int) hashi2Q {
