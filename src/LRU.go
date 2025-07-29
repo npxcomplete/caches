@@ -110,3 +110,13 @@ func (lru *lruCache) Get(key Key) (value Value, err error) {
 	lru.Put(key, value)
 	return
 }
+
+// Range iterates over each entry in the cache. Iteration stops if f returns
+// false.
+func (lru *lruCache) Range(f func(Key, Value) bool) {
+	for k, node := range lru.store {
+		if !f(k, node.value) {
+			return
+		}
+	}
+}

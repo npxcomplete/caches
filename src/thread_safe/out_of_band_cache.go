@@ -6,7 +6,6 @@ import (
 	"github.com/npxcomplete/caches/src"
 )
 
-
 // This is idiomatic ish, but it's also four to ten times slower than the guarded implementation
 func NewOutOfBandCache(ctx context.Context, inner caches.Interface) (safe caches.Interface) {
 	universalConstruction := make(chan func())
@@ -61,4 +60,14 @@ func (cache *outOfBan) Get(key caches.Key) (result caches.Value, err error) {
 		ret <- func() (caches.Value, error) { return val, err }
 	}
 	return (<-ret)()
+}
+
+// see caches.Interface for contract
+func (cache *outOfBan) Range(f func(caches.Key, caches.Value) bool) {
+	done := make(chan struct{})
+	cache.universalConstruction <- func() {
+		cache.generic.Range(f)
+		close(done)
+	}
+	<-done
 }

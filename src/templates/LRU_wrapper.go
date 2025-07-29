@@ -34,3 +34,12 @@ func (cache privateGenericKeyGenericValueLRUCache) Get(key GenericKey) (result G
 	result, _ = value.(GenericValue)
 	return
 }
+
+// see caches.Interface for contract
+func (cache privateGenericKeyGenericValueLRUCache) Range(f func(GenericKey, GenericValue) bool) {
+	cache.generic.Range(func(k caches.Key, v caches.Value) bool {
+		key, _ := k.(GenericKey)
+		val, _ := v.(GenericValue)
+		return f(key, val)
+	})
+}
