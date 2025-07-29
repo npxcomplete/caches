@@ -11,7 +11,7 @@ import (
 )
 
 func Test_AddToEmptyCache(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(2)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](2)
 
 	kvLRU.Put(5, "hello")
 
@@ -24,13 +24,13 @@ func Test_AddToEmptyCache(t *testing.T) {
 }
 
 func Test_AddToFullCache(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(2)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")
 	kvLRU.Put(7, "!")
 
-	var value interface{}
+	var value string
 	var err error
 
 	value, err = kvLRU.Get(6)
@@ -46,7 +46,7 @@ func Test_AddToFullCache(t *testing.T) {
 }
 
 func Test_QueriedValuesReset(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(2)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")
@@ -54,7 +54,7 @@ func Test_QueriedValuesReset(t *testing.T) {
 
 	kvLRU.Put(7, "!")
 
-	var value interface{}
+	var value string
 	var err error
 
 	value, err = kvLRU.Get(5)
@@ -70,7 +70,7 @@ func Test_QueriedValuesReset(t *testing.T) {
 }
 
 func Test_ValueNeverPresent(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(2)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](2)
 
 	kvLRU.Put(5, "hello")
 	kvLRU.Put(6, "world")
@@ -82,14 +82,14 @@ func Test_ValueNeverPresent(t *testing.T) {
 }
 
 func Test_RangeVisitsAll(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(2)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](2)
 
 	kvLRU.Put(1, "a")
 	kvLRU.Put(2, "b")
 
 	visited := make(map[int]string)
-	kvLRU.Range(func(k caches.Key, v caches.Value) bool {
-		visited[k.(int)] = v.(string)
+	kvLRU.Range(func(k int, v string) bool {
+		visited[k] = v
 		return true
 	})
 
@@ -99,13 +99,13 @@ func Test_RangeVisitsAll(t *testing.T) {
 }
 
 func Test_RangeEarlyExit(t *testing.T) {
-	var kvLRU caches.Interface = caches.NewLRUCache(3)
+	var kvLRU caches.Interface[int, string] = caches.NewLRUCache[int, string](3)
 	kvLRU.Put(1, "a")
 	kvLRU.Put(2, "b")
 	kvLRU.Put(3, "c")
 
 	count := 0
-	kvLRU.Range(func(k caches.Key, v caches.Value) bool {
+	kvLRU.Range(func(k int, v string) bool {
 		count++
 		return false
 	})
@@ -114,23 +114,23 @@ func Test_RangeEarlyExit(t *testing.T) {
 }
 
 func Test_RangeThreadSafeWrappers(t *testing.T) {
-	cache := caches.NewLRUCache(2)
+	cache := caches.NewLRUCache[int, string](2)
 	cache.Put(1, "a")
 	cache.Put(2, "b")
 
-	guard := thread_safe.NewGuardedCache(cache)
+	guard := thread_safe.NewGuardedCache[int, string](cache)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	band := thread_safe.NewOutOfBandCache(ctx, cache)
+	band := thread_safe.NewOutOfBandCache[int, string](ctx, cache)
 
 	countGuard := 0
-	guard.Range(func(k caches.Key, v caches.Value) bool {
+	guard.Range(func(k int, v string) bool {
 		countGuard++
 		return true
 	})
 
 	countBand := 0
-	band.Range(func(k caches.Key, v caches.Value) bool {
+	band.Range(func(k int, v string) bool {
 		countBand++
 		return true
 	})

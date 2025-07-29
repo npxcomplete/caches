@@ -13,64 +13,64 @@ var capacity = 10
 var threads = 4
 
 func Benchmark_GuardedLRU_Get(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	cache := NewGuardedCache[int, int](caches.NewLRUCache[int, int](capacity))
 	benchmark_Get(b, cache)
 }
 
 func Benchmark_OutOfBan_Get(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	cache := NewOutOfBandCache[int, int](ctx, caches.NewLRUCache[int, int](capacity))
 	benchmark_Get(b, cache)
 }
 
 func Benchmark_GuardedLRU_Put(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	cache := NewGuardedCache[int, int](caches.NewLRUCache[int, int](capacity))
 	benchmark_Put(b, cache)
 }
 
 func Benchmark_OutOfBan_Put(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	cache := NewOutOfBandCache[int, int](ctx, caches.NewLRUCache[int, int](capacity))
 	benchmark_Put(b, cache)
 }
 
 func Benchmark_HashiCorp_GuardedLRU_parallel_Get(b *testing.B) {
-	cache := caches.New2Q(capacity)
+	cache := caches.New2Q[int, int](capacity)
 	benchmark_parallel_Get(b, cache)
 }
 
 func Benchmark_HashiCorp_LRU_parallel_Put(b *testing.B) {
-	cache := caches.New2Q(capacity)
+	cache := caches.New2Q[int, int](capacity)
 	benchmark_parallel_Put(b, cache)
 }
 
 func Benchmark_GuardedLRU_parallel_Get(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	cache := NewGuardedCache[int, int](caches.NewLRUCache[int, int](capacity))
 	benchmark_parallel_Get(b, cache)
 }
 
 func Benchmark_GuardedLRU_parallel_Put(b *testing.B) {
-	cache := NewGuardedCache(caches.NewLRUCache(capacity))
+	cache := NewGuardedCache[int, int](caches.NewLRUCache[int, int](capacity))
 	benchmark_parallel_Put(b, cache)
 }
 
 func Benchmark_OutOfBan_parallel_Get(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	cache := NewOutOfBandCache[int, int](ctx, caches.NewLRUCache[int, int](capacity))
 	benchmark_parallel_Get(b, cache)
 }
 
 func Benchmark_OutOfBan_parallel_Put(b *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cache := NewOutOfBandCache(ctx, caches.NewLRUCache(capacity))
+	cache := NewOutOfBandCache[int, int](ctx, caches.NewLRUCache[int, int](capacity))
 	benchmark_parallel_Put(b, cache)
 }
 
-func benchmark_Get(b *testing.B, cache caches.Interface) {
+func benchmark_Get(b *testing.B, cache caches.Interface[int, int]) {
 	keys := genKeys()
 	for i := 0; i < len(keys); i++ {
 		cache.Put(keys[i], 12)
@@ -82,7 +82,7 @@ func benchmark_Get(b *testing.B, cache caches.Interface) {
 	}
 }
 
-func benchmark_Put(b *testing.B, cache caches.Interface) {
+func benchmark_Put(b *testing.B, cache caches.Interface[int, int]) {
 	keys := genKeys()
 
 	b.ResetTimer()
@@ -91,8 +91,7 @@ func benchmark_Put(b *testing.B, cache caches.Interface) {
 	}
 }
 
-
-func benchmark_parallel_Get(b *testing.B, cache caches.Interface) {
+func benchmark_parallel_Get(b *testing.B, cache caches.Interface[int, int]) {
 	keys := genKeys()
 	for i := 0; i < len(keys); i++ {
 		cache.Put(keys[i], 12)
@@ -112,7 +111,7 @@ func benchmark_parallel_Get(b *testing.B, cache caches.Interface) {
 	wg.Wait()
 }
 
-func benchmark_parallel_Put(b *testing.B, cache caches.Interface) {
+func benchmark_parallel_Put(b *testing.B, cache caches.Interface[int, int]) {
 	keys := genKeys()
 
 	b.ResetTimer()
@@ -136,4 +135,3 @@ func genKeys() []int {
 	}
 	return alloc
 }
-
