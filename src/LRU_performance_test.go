@@ -8,7 +8,7 @@ import (
 )
 
 func Benchmark_LRUCache_Put_single_key(b *testing.B) {
-	lru := NewLRUCache(2)
+	lru := NewLRUCache[string, string](2)
 
 	for i := 0; i < b.N; i++ {
 		lru.Put("hello", "world")
@@ -16,7 +16,7 @@ func Benchmark_LRUCache_Put_single_key(b *testing.B) {
 }
 
 func Benchmark_LRUCache_Put_multi_key_with_high_eviction(b *testing.B) {
-	lru := NewLRUCache(2)
+	lru := NewLRUCache[string, string](2)
 
 	gen := random_strings.ByteStringGenerator{
 		Alphabet:  random_strings.EnglishAlphabet,
@@ -29,7 +29,7 @@ func Benchmark_LRUCache_Put_multi_key_with_high_eviction(b *testing.B) {
 }
 
 func Benchmark_LRUCache_Put_multi_key_with_low_eviction(b *testing.B) {
-	lru := NewLRUCache(10000)
+	lru := NewLRUCache[string, string](10000)
 
 	gen := random_strings.ByteStringGenerator{
 		Alphabet:  random_strings.EnglishAlphabet,
@@ -42,9 +42,9 @@ func Benchmark_LRUCache_Put_multi_key_with_low_eviction(b *testing.B) {
 }
 
 func Benchmark_LRUCache_Get_MRU(b *testing.B) {
-	lru := NewLRUCache(10)
+	lru := NewLRUCache[string, string](10)
 
-	keys := []string {
+	keys := []string{
 		"hello1",
 		"hello2",
 		"hello3",
@@ -62,9 +62,9 @@ func Benchmark_LRUCache_Get_MRU(b *testing.B) {
 }
 
 func Benchmark_LRUCache_Get_cycle(b *testing.B) {
-	lru := NewLRUCache(10)
+	lru := NewLRUCache[string, string](10)
 
-	keys := []string {
+	keys := []string{
 		"hello1",
 		"hello2",
 		"hello3",
@@ -77,12 +77,12 @@ func Benchmark_LRUCache_Get_cycle(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		lru.Get(keys[i % len(keys)])
+		lru.Get(keys[i%len(keys)])
 	}
 }
 
 func Benchmark_LRUCache_Put_with_eviction_and_no_gen(b *testing.B) {
-	lru := NewLRUCache(4)
+	lru := NewLRUCache[string, string](4)
 
 	keys := []string{
 		"aaaa",
@@ -93,6 +93,6 @@ func Benchmark_LRUCache_Put_with_eviction_and_no_gen(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		lru.Put(keys[i % len(keys)], "world")
+		lru.Put(keys[i%len(keys)], "world")
 	}
 }

@@ -6,16 +6,18 @@ import (
 	"github.com/npxcomplete/caches/src"
 )
 
-// This is idiomatic ish, but it's also four to ten times slower than the guarded implementation
-func NewOutOfBandCache(ctx context.Context, inner caches.Interface) (safe caches.Interface) {
+// NewOutOfBandCache provides a cache implementation that performs all
+// operations on a single goroutine. It is much slower than the guarded
+// implementation but is included for completeness.
+func NewOutOfBandCache[K comparable, V any](ctx context.Context, inner caches.Interface[K, V]) (safe caches.Interface[K, V]) {
 	universalConstruction := make(chan func())
 
-	safe = &outOfBan{
+	safe = &outOfBan[K, V]{
 		generic:               inner,
 		universalConstruction: universalConstruction,
 	}
 
-	go func(ctx context.Context, inner caches.Interface) {
+	go func(ctx context.Context, inner caches.Interface[K, V]) {
 		for {
 			select {
 			case f := <-universalConstruction:
@@ -29,14 +31,14 @@ func NewOutOfBandCache(ctx context.Context, inner caches.Interface) (safe caches
 	return
 }
 
-// genny is case sensitive even though this has other meanings in go, so we prefix the intent.
-type outOfBan struct {
+// outOfBan serialises all cache operations on a dedicated goroutine.
+type outOfBan[K comparable, V any] struct {
 	universalConstruction chan func()
-	generic               caches.Interface
+	generic               caches.Interface[K, V]
 }
 
-func (cache *outOfBan) Keys() []caches.Key {
-	ret := make(chan []caches.Key)
+func (cache *outOfBan[K, V]) Keys() []K {
+	ret := make(chan []K)
 	cache.universalConstruction <- func() {
 		ret <- cache.generic.Keys()
 	}
@@ -44,8 +46,8 @@ func (cache *outOfBan) Keys() []caches.Key {
 }
 
 // see caches.Interface for contract
-func (cache *outOfBan) Put(key caches.Key, value caches.Value) caches.Value {
-	ret := make(chan caches.Value)
+func (cache *outOfBan[K, V]) Put(key K, value V) V {
+	ret := make(chan V)
 	cache.universalConstruction <- func() {
 		ret <- cache.generic.Put(key, value)
 	}
@@ -53,17 +55,17 @@ func (cache *outOfBan) Put(key caches.Key, value caches.Value) caches.Value {
 }
 
 // see caches.Interface for contract
-func (cache *outOfBan) Get(key caches.Key) (result caches.Value, err error) {
-	ret := make(chan func() (caches.Value, error))
+func (cache *outOfBan[K, V]) Get(key K) (result V, err error) {
+	ret := make(chan func() (V, error))
 	cache.universalConstruction <- func() {
 		val, err := cache.generic.Get(key)
-		ret <- func() (caches.Value, error) { return val, err }
+		ret <- func() (V, error) { return val, err }
 	}
 	return (<-ret)()
 }
 
 // see caches.Interface for contract
-func (cache *outOfBan) Range(f func(caches.Key, caches.Value) bool) {
+func (cache *outOfBan[K, V]) Range(f func(K, V) bool) {
 	done := make(chan struct{})
 	cache.universalConstruction <- func() {
 		cache.generic.Range(f)

@@ -1,59 +1,63 @@
 package caches
 
-// 48 bytes (16 per interface, 8 per concrete pointer)
-type lruNode struct {
-	next *lruNode
-	prev *lruNode
+// lruNode is a single entry in the cache.
+// 48 bytes (16 per interface, 8 per concrete pointer) in the original
+// implementation. With generics the size is similar and depends on the key and
+// value types.
+type lruNode[K comparable, V any] struct {
+	next *lruNode[K, V]
+	prev *lruNode[K, V]
 
-	key   Key
-	value Value
+	key   K
+	value V
 }
 
-type lruCache struct {
+type lruCache[K comparable, V any] struct {
 	// add to head
-	head *lruNode
+	head *lruNode[K, V]
 
 	// fast access
-	store map[Key]*lruNode
+	store map[K]*lruNode[K, V]
 
 	// full if stack == nil
-	stack *lruNode
+	stack *lruNode[K, V]
 
 	// v_node pool, to prevent GC churn
-	nodes []lruNode
+	nodes []lruNode[K, V]
 }
 
-// ~ 48 bytes per entry.
-func NewLRUCache(capacity int) *lruCache {
-	memoryPool := make([]lruNode, capacity)
+// NewLRUCache returns a new LRU cache with the provided capacity.
+// ~48 bytes per entry in the original implementation.
+func NewLRUCache[K comparable, V any](capacity int) *lruCache[K, V] {
+	memoryPool := make([]lruNode[K, V], capacity)
 	for i := 0; i < capacity-1; i++ {
 		memoryPool[i].next = &memoryPool[i+1]
 	}
 
 	// simplified nil checks
-	dummy := &lruNode{}
+	dummy := &lruNode[K, V]{}
 
 	dummy.next = dummy
 	dummy.prev = dummy
 
-	return &lruCache{
-		store: make(map[Key]*lruNode, capacity),
+	return &lruCache[K, V]{
+		store: make(map[K]*lruNode[K, V], capacity),
 		stack: &memoryPool[0],
 		head:  dummy,
 		nodes: memoryPool,
 	}
 }
 
-func (lru *lruCache) Keys() []Key {
-	keys := make([]Key, len(lru.nodes))
+func (lru *lruCache[K, V]) Keys() []K {
+	keys := make([]K, 0, len(lru.nodes))
 	for _, node := range lru.nodes {
 		keys = append(keys, node.key)
 	}
 	return keys
 }
 
-func (lru *lruCache) Put(key Key, value Value) (evictedValue Value) {
-	var node *lruNode = nil
+func (lru *lruCache[K, V]) Put(key K, value V) (evictedValue V) {
+	var node *lruNode[K, V]
 	var ok bool
 
 	if node, ok = lru.store[key]; ok {
@@ -97,12 +101,13 @@ func (lru *lruCache) Put(key Key, value Value) (evictedValue Value) {
 	return
 }
 
-func (lru *lruCache) Get(key Key) (value Value, err error) {
-	var node *lruNode
+func (lru *lruCache[K, V]) Get(key K) (value V, err error) {
+	var node *lruNode[K, V]
 	var ok bool
 	if node, ok = lru.store[key]; !ok {
 		err = MissingValueError
-		return
+		var zero V
+		return zero, err
 	}
 
 	value = node.value
@@ -113,7 +118,8 @@ func (lru *lruCache) Get(key Key) (value Value, err error) {
 
 // Range iterates over each entry in the cache. Iteration stops if f returns
 // false.
-func (lru *lruCache) Range(f func(Key, Value) bool) {
+
+func (lru *lruCache[K, V]) Range(f func(K, V) bool) {
 	for k, node := range lru.store {
 		if !f(k, node.value) {
 			return
